@@ -1,8 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\TaskController;
-use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,12 +16,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// private route
 Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::resource('tasks', TaskController::class)->except('index', 'show');
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+Route::resource('tasks', TaskController::class)->only('index', 'show');
 
+// auth routes
 
-// public route
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
