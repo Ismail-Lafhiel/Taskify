@@ -30,7 +30,7 @@ class TaskController extends Controller
             "status" => "required|in:todo,doing,done",
         ]);
 
-        // Create task for the authenticated user
+        // Creating the task for the authenticated user
         $task = Auth::user()->tasks()->create($request->all());
         return $task;
     }
@@ -38,46 +38,71 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $task)
+    public function show(Task $id)
     {
-        // Check if the task belongs to the authenticated user
-        if (Auth::id() === $task->user_id) {
-            return $task;
-        } else {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        try {
+            $task = Task::findOrFail($id);
+
+            if (!$this->authorize('view', $task)) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            }
+
+            return response()->json(['status' => 'success', 'data' => $task]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Task not found'], 404);
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(Request $request, $id)
     {
-        // Check if the task belongs to the authenticated user
-        if (Auth::id() !== $task->user_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        try {
+            $task = Task::findOrFail($id);
+
+            if (!$this->authorize('update', $task)) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            }
+
+            $request->validate([
+                "name" => "required",
+                "description" => "required",
+                "status" => "required|in:todo,doing,done",
+            ]);
+
+            $task->update($request->all());
+
+            return response()->json(['status' => 'success', 'message' => 'Task updated successfully', 'data' => $task]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Task not found'], 404);
         }
-
-        $request->validate([
-            "name" => "required",
-            "description" => "required",
-            "status" => "required|in:todo,doing,done",
-        ]);
-
-        $task->update($request->all());
-        return $task;
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy($id)
     {
-        // Check if the task belongs to the authenticated user
-        if (Auth::id() !== $task->user_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        try {
+            $task = Task::findOrFail($id);
 
-        return $task->delete();
+            if (!$this->authorize('delete', $task)) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            }
+
+            $task->delete();
+
+            return response()->json(['status' => 'success', 'message' => 'Task deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Task not found'], 404);
+        }
+    }
+    /**
+     * search the specified resource from storage.
+     */
+    public function search($status)
+    {
+        return Task::where('status', $status)->get();
     }
 }
