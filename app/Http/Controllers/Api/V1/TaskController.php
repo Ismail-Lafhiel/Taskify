@@ -38,10 +38,10 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $id)
+    public function show(Task $task)
     {
         try {
-            $task = Task::findOrFail($id);
+            $task = Task::findOrFail($task->id);
 
             if (!$this->authorize('view', $task)) {
                 return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
@@ -93,7 +93,7 @@ class TaskController extends Controller
 
             $task->delete();
 
-            return response()->json(['status' => 'success', 'message' => 'Task deleted successfully']);
+            return response()->json(['status' => 'success', 'message' => 'Task '.$task->id.' deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Task not found'], 404);
         }
