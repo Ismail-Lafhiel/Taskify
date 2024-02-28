@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +33,7 @@ class TaskController extends Controller
 
         // Creating the task for the authenticated user
         $task = Auth::user()->tasks()->create($request->all());
-        return $task;
+        return new TaskResource($task);
     }
 
     /**
@@ -47,7 +48,7 @@ class TaskController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
             }
 
-            return response()->json(['status' => 'success', 'data' => $task]);
+            return response()->json(['status' => 'success', 'data' => new TaskResource($task)]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Task not found'], 404);
         }
@@ -73,7 +74,7 @@ class TaskController extends Controller
 
             $task->update($request->all());
 
-            return response()->json(['status' => 'success', 'message' => 'Task updated successfully', 'data' => $task]);
+            return response()->json(['status' => 'success', 'message' => 'Task updated successfully', 'data' => new TaskResource($task)]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Task not found'], 404);
         }
@@ -93,7 +94,7 @@ class TaskController extends Controller
 
             $task->delete();
 
-            return response()->json(['status' => 'success', 'message' => 'Task '.$task->id.' deleted successfully']);
+            return response()->json(['status' => 'success', 'message' => 'Task ' . $task->id . ' deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => 'Task not found'], 404);
         }
@@ -103,6 +104,7 @@ class TaskController extends Controller
      */
     public function search($status)
     {
-        return Task::where('status', $status)->get();
+        $task = Task::where('status', $status)->get();
+        return new TaskResource($task);
     }
 }
