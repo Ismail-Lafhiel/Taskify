@@ -17,12 +17,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::resource('tasks', TaskController::class)->except('index', 'show');
+    Route::apiResource('tasks', TaskController::class);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
-Route::resource('tasks', TaskController::class)->only('index', 'show');
+
+// public routes
+
+Route::get('tasks/status/{status}', [TaskController::class,'search']);
 
 // auth routes
-
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
