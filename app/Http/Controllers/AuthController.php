@@ -61,4 +61,14 @@ class AuthController extends Controller
             'message' => 'log out'
         ];
     }
+    public function getUser(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user) {
+            return response()->json(['user' => $user], 200);
+        } else {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+    }
 }

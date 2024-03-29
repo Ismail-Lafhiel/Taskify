@@ -17,14 +17,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::apiResource('tasks', TaskController::class);
+    Route::apiResource('tasks', TaskController::class)->except('store');
+    Route::post('tasks/store', [TaskController::class, 'store']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'getUser'])->name('user');
 });
 
 // public routes
-
+// Route::apiResource('tasks', TaskController::class)->only('index', 'show');
 Route::get('tasks/status/{status}', [TaskController::class,'search']);
 
 // auth routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
